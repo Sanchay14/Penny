@@ -3,7 +3,9 @@ import Image from "next/image"
 import Link from "next/link"
 import { Button } from "./ui/button"
 import { LayoutDashboard } from "lucide-react"
-const header=()=> {
+import { checkUser } from "@/lib/checkUser"
+const header=async ()=> {
+  await checkUser();
   return (
     <div className="fixed top-0 w-full bg-gradient-to-b from-[#0079fa] to-[#043efa] backdrop-blur-md z-50 border-b">
       <nav className="container mx-auto px-4 py-4 flex items-center justify-between">
