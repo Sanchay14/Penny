@@ -1,4 +1,4 @@
-# Pennie
+# Pennie – AI-Powered Personal Finance Dashboard
 
 [![MIT License](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
 [![Next.js](https://img.shields.io/badge/Next.js-15.3.4-blue?logo=next.js)](https://nextjs.org/)
@@ -7,63 +7,70 @@
 [![Tailwind CSS](https://img.shields.io/badge/Style-TailwindCSS-38B2AC?logo=tailwind-css)](https://tailwindcss.com/)
 
 > **Track your finances with intelligence.**  
-> Pennie is an AI-powered financial assistant that helps you track your expenses, analyze spending, and make smarter financial decisions—all in one secure, modern dashboard.
+> **Pennie** is a modern, AI-powered financial assistant that helps you track expenses, analyze spending, and make smarter financial decisions—all in one secure, beautiful dashboard.
+
+---
+
+## ✨ Why Pennie? (What Makes This Project Stand Out)
+
+- **AI-Driven:** Uses Google Gemini AI for receipt scanning and smart analytics.
+- **Enterprise-Grade Security:** Clerk authentication, Arcjet security, and bot protection.
+- **Modern UX:** Built with Next.js, Tailwind, and Radix UI for a seamless, accessible experience.
+- **Scalable & Modular:** Clean architecture, scalable database models, and robust API design.
+- **Real-World Ready:** Designed for both individuals and families/groups, with recurring transactions, budgets, and multi-account support.
+- **Production-Ready:** Follows best practices for deployment, environment management, and code quality.
+
+---
+
+## 🖼️ Screenshots
+
+> _Add your dashboard screenshot here for maximum impact!_
+
+![Dashboard Preview](public/banner.jpg)
 
 ---
 
 ## 🚀 Features
 
-- **Multi-Account Analysis**  
-  Analyze spending patterns across multiple accounts in one unified dashboard.
-- **AI Bill Photo Detection**  
-  Snap photos of bills and receipts—our AI automatically extracts and records transaction details.
-- **Smart Budget Alerts**  
-  Set budget limits and get email reminders when you're approaching your spending threshold.
-- **Monthly Tracking Reports**  
-  Receive detailed monthly spending analysis reports directly in your inbox.
-- **AI Enhanced Analytics**  
-  Get intelligent insights on where and how much you spend with advanced AI analysis.
-- **Enterprise Security**  
-  Protected by Clerk authentication, Arcjet security, and advanced bot protection.
+- **Multi-Account Analysis:** Unified dashboard for all your accounts.
+- **AI Bill Photo Detection:** Snap receipts, let AI extract and record details.
+- **Smart Budget Alerts:** Set limits, get email reminders.
+- **Monthly Tracking Reports:** Detailed analysis delivered to your inbox.
+- **AI Enhanced Analytics:** Deep insights into your spending.
+- **Enterprise Security:** Clerk, Arcjet, and bot protection.
 
 ---
 
 ## 🛠️ Tech Stack
 
 - **Next.js** (React framework)
-- **Prisma** (ORM for PostgreSQL)
+- **Prisma** (PostgreSQL ORM)
 - **Clerk** (Authentication)
-- **Arcjet** (Security Layer)
-- **AI/ML** (Photo Detection)
+- **Arcjet** (Security)
+- **Google Gemini AI** (Receipt scanning)
 - **Tailwind CSS** (Styling)
-- **Radix UI** (Accessible UI components)
-- **Email** (Smart Alerts)
+- **Radix UI** (Accessible UI)
+- **TypeScript** (Type safety)
+- **Zod** (Validation)
+- **Recharts** (Data visualization)
 
 ---
 
 ## 🧑‍💻 How It Works
 
-1. **Connect Your Accounts**  
-   Securely link your bank accounts and credit cards with our encrypted system.
-2. **Snap & Track**  
-   Take photos of bills or let our system automatically track your transactions.
-3. **Get Smart Insights**  
-   Receive AI-powered insights, budget alerts, and monthly reports via email.
+1. **Connect Your Accounts:** Securely link your bank accounts and cards.
+2. **Snap & Track:** Take photos of bills or let the system auto-track transactions.
+3. **Get Smart Insights:** Receive AI-powered insights, budget alerts, and monthly reports.
 
 ---
 
-## 💡 What You'll Love
+## 🏆 Key Engineering Highlights
 
-- **Save Time:** No more manual receipt entry—just snap a photo and let AI handle the rest.
-- **Stay Protected:** Enterprise-grade security with Clerk authentication and Arcjet protection.
-- **Never Miss Budget Limits:** Get timely email alerts when approaching your spending thresholds.
-
----
-
-## 🏗️ Database Models
-
-- **User, Group, Account, Transaction, Budget**  
-  Supports both individual and family/group modes, recurring transactions, and budget management.
+- **AI Receipt Scanning:** Integrates Google Gemini for real-time, accurate data extraction from images.
+- **Secure Multi-Account Support:** Each user can manage multiple accounts with role-based access.
+- **Modular, Scalable Codebase:** Clean separation of concerns, reusable components, and scalable database models.
+- **Modern UI/UX:** Responsive, accessible, and visually appealing interface.
+- **Robust Testing & Linting:** Ensures code quality and reliability.
 
 ---
 
@@ -73,9 +80,10 @@
    ```bash
    npm install
    ```
-2. **Set up your environment variables:**
+2. **Set up environment variables:**
    - `DATABASE_URL` for PostgreSQL
-   - Clerk/Arcjet credentials as needed
+   - Clerk/Arcjet credentials
+   - `GEMINI_API_KEY` for AI features
 
 3. **Run database migrations:**
    ```bash
@@ -100,20 +108,31 @@
 
 ---
 
+## 🗄️ Database Models
+
+- **User, Account, Transaction, Budget**
+- Supports individual/group modes, recurring transactions, and budget management.
+
+---
+
+## 🙋‍♂️ Contact
+
+**Sanchay Jadon**  
+[GitHub](https://github.com/Sanchay22) 
+_Email: jadonsanchay@gmail.com_ <!-- (replace with your real email if you want) -->
+
+---
+
 ## 📄 License
 
 MIT
 
 ---
 
-## 🙏 Credits
-
-Made with ❤️ by [Sanchay](https://github.com/Sanchay22)
-
----
-
-## 📣 Contributing
+## 🤝 Contributing
 
 Pull requests and issues are welcome! Please open an issue to discuss what you’d like to change.
 
 ---
+
+**_Ready to take control of your finances? Try Pennie today!_**
