@@ -35,7 +35,7 @@ export function AccountCard({ account }: AccountCardProps) {
         </CardHeader>
         <CardContent>
           <div className="text-2xl font-bold">
-            ${parseFloat(balance.toString()).toFixed(2)}
+            Rs.{parseFloat(balance.toString()).toFixed(2)}
           </div>
           <p className="text-xs text-muted-foreground">
             {type.charAt(0).toUpperCase() + type.slice(1).toLowerCase()} Account
