@@ -1,24 +1,11 @@
-"use client";
+import React, { ReactNode } from 'react';
 
-import { Suspense } from "react";
-import { BarLoader } from "react-spinners";
-import DashboardPage  from "./page"; 
-
-const Layout: React.FC = () => {
-  return (
-    <div>
-      <div className="flex items-center justify-between mb-5 mt-25">
-        <h1 className="text-6xl font-bold tracking-tight gradient-title">
-          Dashboard
-        </h1>
-      </div>
-      <Suspense
-        fallback={<BarLoader className="mt-4" width={"100%"} color="#9333ea" />}
-      >
-        <DashboardPage />
-      </Suspense>
-    </div>
-  );
+type DashboardLayoutProps = {
+  children: ReactNode;
 };
 
-export default Layout;
+const DashboardLayout = ({ children }: DashboardLayoutProps) => {
+  return <div className="container mx-auto">{children}</div>;
+};
+
+export default DashboardLayout;

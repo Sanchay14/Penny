@@ -5,7 +5,7 @@ type MainLayoutProps = {
 };
 
 const MainLayout = ({ children }: MainLayoutProps) => {
-  return <div>{children}</div>;  
+  return <div className='pt-32 px-4'>{children}</div>;  
 };
 
 export default MainLayout;

@@ -1,9 +1,10 @@
+// actions/dashboard.ts
 "use server";
 
 import { db } from "@/lib/prisma";
 import { auth } from "@clerk/nextjs/server";
 import { revalidatePath } from "next/cache";
-import type { Account, User } from "@prisma/client";
+import { Account, User, AccountType} from "@prisma/client";
 
 // Input interface for account creation
 interface CreateAccountInput {
@@ -12,9 +13,12 @@ interface CreateAccountInput {
   isDefault?: boolean;
   color?: string;
   icon?: string;
+  type?: string;
   [key: string]: any;
 }
-
+function isValidAccountType(value: any): value is AccountType {
+  return Object.values(AccountType).includes(value);
+}
 // Helper to serialize Decimal fields
 function serializeAccount(account: Account): Omit<Account, "balance"> & { balance: number } {
   return {
@@ -25,18 +29,27 @@ function serializeAccount(account: Account): Omit<Account, "balance"> & { balanc
   };
 }
 
-// Get all accounts for a user
-export async function getUserAccounts(): Promise<{ success: true; data: any[] }> {
+
+// Get all accounts for a user - now cached
+export async function getUserAccounts(): Promise<{ success: boolean; data?: any[]; error?: string }> {
   try {
     const { userId } = await auth();
-    if (!userId) throw new Error("Unauthorized");
-    console.log(userId);
+    if (!userId) {
+      return { success: false, error: "Unauthorized" };
+    }
+
+    console.log("Fetching accounts for user:", userId);
+    
     const user = await db.user.findUnique({
       where: { clerkUserId: userId },
     });
 
-    if (!user) throw new Error("User not found");
+    if (!user) {
+      return { success: false, error: "User not found" };
+    }
 
+    console.log("User found:", user.id);
+    
     const accounts = await db.account.findMany({
       where: { userId: user.id },
       orderBy: { createdAt: "desc" },
@@ -53,12 +66,15 @@ export async function getUserAccounts(): Promise<{ success: true; data: any[] }>
       ...serializeAccount({
         ...account,
         userId: account.userId ?? "",
-      } as Account)
+      } as Account),
+      _count: account._count
     }));
 
+    console.log("Found accounts:", serializedAccounts.length);
     return { success: true, data: serializedAccounts };
   } catch (error: any) {
-    throw new Error(error.message);
+    console.error("Error in getUserAccounts:", error);
+    return { success: false, error: error.message || "Failed to fetch accounts" };
   }
 }
 
@@ -69,11 +85,9 @@ export async function createAccount(
   try {
     const { userId } = await auth();
     if (!userId) throw new Error("Unauthorized");
-
     const user = await db.user.findUnique({
       where: { clerkUserId: userId },
     });
-
     if (!user) throw new Error("User not found");
 
     const balanceFloat = parseFloat(data.balance);
@@ -81,19 +95,20 @@ export async function createAccount(
       throw new Error("Invalid balance amount");
     }
 
+    // Handle default account logic
     if (data.isDefault) {
       await db.account.updateMany({
         where: { userId: user.id, isDefault: true },
         data: { isDefault: false },
       });
     }
-
+    const accountType=isValidAccountType(data.type)?data.type:AccountType.SAVINGS;
     const account = await db.account.create({
       data: {
         ...data,
         balance: balanceFloat,
         userId: user.id,
-        type:data.type??"CHECKING"
+        type: accountType,
       },
     });
 
@@ -105,6 +120,7 @@ export async function createAccount(
     revalidatePath("/dashboard");
     return { success: true, data: serializedAccount };
   } catch (error: any) {
+    console.error("Error creating account:", error);
     throw new Error(error.message);
   }
 }

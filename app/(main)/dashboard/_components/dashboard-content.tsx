@@ -1,14 +1,10 @@
-// app/dashboard/page.tsx
-import { Suspense } from "react";
-import { BarLoader } from "react-spinners";
 import { getUserAccounts } from "@/actions/dashboard";
-import { AccountCard } from "./_components/account-card";
+import { AccountCard } from "./account-card";
 import { CreateAccountDrawer } from "@/components/create-account-drawer";
 import { Card, CardContent } from "@/components/ui/card";
 import { Plus } from "lucide-react";
 
-// Create the async component for the accounts
-async function AccountsGrid() {
+export default async function DashboardContent() {
   console.log("Fetching accounts");
   
   try {
@@ -48,25 +44,4 @@ async function AccountsGrid() {
       </div>
     );
   }
-}
-
-// Main dashboard page component
-export default function DashboardPage() {
-  return (
-    <div>
-      {/* This title will always be visible */}
-      <div className="flex items-center justify-between mb-8">
-        <h1 className="text-6xl font-bold tracking-tight gradient-title">
-          Dashboard
-        </h1>
-      </div>
-      
-      {/* Only the accounts grid is wrapped in Suspense */}
-      <Suspense
-        fallback={<BarLoader className="mt-4" width={"100%"} color="#9333ea" />}
-      >
-        <AccountsGrid />
-      </Suspense>
-    </div>
-  );
 }
