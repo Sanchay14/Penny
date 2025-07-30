@@ -124,3 +124,55 @@ export async function createAccount(
     throw new Error(error.message);
   }
 }
+
+// Set an account as default
+export async function setDefaultAccount(accountId: string): Promise<{ success: boolean; error?: string }> {
+  try {
+    const { userId } = await auth();
+    if (!userId) {
+      return { success: false, error: "Unauthorized" };
+    }
+
+    const user = await db.user.findUnique({
+      where: { clerkUserId: userId },
+    });
+
+    if (!user) {
+      return { success: false, error: "User not found" };
+    }
+
+    // Verify the account belongs to the user
+    const account = await db.account.findFirst({
+      where: {
+        id: accountId,
+        userId: user.id,
+      },
+    });
+
+    if (!account) {
+      return { success: false, error: "Account not found" };
+    }
+
+    // Use a transaction to ensure atomicity
+    await db.$transaction(async (tx) => {
+      // First, set all accounts to not default
+      await tx.account.updateMany({
+        where: { userId: user.id },
+        data: { isDefault: false },
+      });
+
+      // Then set the selected account as default
+      await tx.account.update({
+        where: { id: accountId },
+        data: { isDefault: true },
+      });
+    });
+
+    revalidatePath("/dashboard");
+    revalidatePath("/");
+    return { success: true };
+  } catch (error: any) {
+    console.error("Error setting default account:", error);
+    return { success: false, error: error.message || "Failed to set default account" };
+  }
+}
