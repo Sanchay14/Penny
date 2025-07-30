@@ -65,15 +65,16 @@ model Transaction {
 }
 
 model Budget {
-  id          String       @id @default(uuid())
-  amount      Decimal
-  period      BudgetPeriod // Already defines if it's daily/weekly/monthly/yearly
-  startDate   DateTime
-  endDate     DateTime?    // Optional end date for the budget
-  userId      String
-  user        User         @relation(fields: [userId], references: [id], onDelete: Cascade)
-  createdAt   DateTime     @default(now())
-  updatedAt   DateTime     @updatedAt
+  id            String       @id @default(uuid())
+  amount        Decimal
+  period        BudgetPeriod // Already defines if it's daily/weekly/monthly/yearly
+  startDate     DateTime
+  endDate       DateTime?    // Optional end date for the budget
+  lastAlertSent DateTime?    // Track when last budget alert was sent
+  userId        String
+  user          User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+  createdAt     DateTime     @default(now())
+  updatedAt     DateTime     @updatedAt
 
   @@index([userId])
   @@map("budgets")

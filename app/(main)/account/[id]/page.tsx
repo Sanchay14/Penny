@@ -1,6 +1,5 @@
 import { Suspense } from "react";
 import { getAccountWithTransactions } from "@/actions/accounts";
-import { bulkDeleteTransactions } from "@/actions/accounts";
 import { BarLoader } from "react-spinners";
 import { TransactionTable } from "../_components/transaction-table";
 import { notFound } from "next/navigation";
@@ -31,7 +30,7 @@ export default async function AccountPage({ params}:any) {
 
         <div className="text-right pb-2">
           <div className="text-xl sm:text-2xl font-bold">
-            Rs.{account.balance.toFixed(2)}
+            ₹{account.balance.toFixed(2)}
           </div>
           <p className="text-sm text-muted-foreground">
             {account._count.transactions} Transactions
@@ -52,10 +51,6 @@ export default async function AccountPage({ params}:any) {
       >
         <TransactionTable
           transactions={transactions}
-          onDelete={async (ids) => {
-            "use server";
-            await bulkDeleteTransactions(ids);
-          }}
         />
       </Suspense>
     </div>

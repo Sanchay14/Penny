@@ -28,26 +28,27 @@ export default function RootLayout({
 }>) {
   return (
     <ClerkProvider>
-<html lang="en">
-      <body
-        className={`${inter.className} `}>
+      <html lang="en" suppressHydrationWarning>
+        <body
+          className={`${inter.className}`}
+          suppressHydrationWarning
+        >
           <ThemeProvider>
-          {/* Header */}
-          <Header />
-          <main className="min-h-screen">
-        {children}
-        </main>
-        <Toaster richColors />
-        {/* Footer */}
-        <footer className="bg-blue-50 py-12">
-          <p className="text-center text-sm text-gray-500">
-            &copy; {new Date().getFullYear()} Pennie. All rights reserved. Made with ❤️ by <a href="https://github.com/Sanchay22" className="text-blue-500 hover:underline">Sanchay</a>
-          </p>
-        </footer>
-        </ThemeProvider>
-      </body>
-    </html>
+            {/* Header */}
+            <Header />
+            <main className="min-h-screen">
+              {children}
+            </main>
+            <Toaster richColors />
+            {/* Footer */}
+            <footer className="bg-blue-50 py-12">
+              <p className="text-center text-sm text-gray-500">
+                &copy; {new Date().getFullYear()} Pennie. All rights reserved. Made with ❤️ by <a href="https://github.com/Sanchay22" className="text-blue-500 hover:underline">Sanchay</a>
+              </p>
+            </footer>
+          </ThemeProvider>
+        </body>
+      </html>
     </ClerkProvider>
-    
   );
 }

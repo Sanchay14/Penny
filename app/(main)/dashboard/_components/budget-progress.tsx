@@ -108,7 +108,7 @@ export function BudgetProgress({ initialBudget, currentExpenses }: BudgetProgres
               <>
                 <CardDescription className="text-base text-blue-700 dark:text-blue-300">
                   {initialBudget
-                    ? `$${currentExpenses.toFixed(2)} of $${initialBudget.amount.toFixed(2)} spent`
+                    ? ` ₹${currentExpenses.toFixed(2)} of ₹ ${initialBudget.amount.toFixed(2)} spent`
                     : "No budget set - Click to add one"}
                 </CardDescription>
                 <Button
@@ -139,7 +139,7 @@ export function BudgetProgress({ initialBudget, currentExpenses }: BudgetProgres
             />
             <div className="flex justify-between items-center">
               <p className="text-sm text-muted-foreground">
-                Remaining: ${(initialBudget.amount - currentExpenses).toFixed(2)}
+                Remaining: ₹{(initialBudget.amount - currentExpenses).toFixed(2)}
               </p>
               <p className="text-sm font-medium">
                 {percentUsed.toFixed(1)}% used
