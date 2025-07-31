@@ -41,7 +41,7 @@ interface SerializedTransaction {
 }
 
 interface Props {
-  searchParams: { edit?: string };
+  searchParams: Promise<{ edit?: string }>;
 }
 
 export default async function AddTransactionPage({ searchParams }: Props): Promise<React.ReactElement> {

@@ -41,14 +41,22 @@ const HeroSection = () => {
           get insights into your spending, and make smarter financial decisions.
         </p>
         <div className="flex justify-center space-x-4">
-          <Link href="/dashboard">
-            <Button size="lg" className="px-8">
-              Get Started
+          <Link href="/dashboard" className="group">
+            <Button 
+              size="lg" 
+              className="px-8 transition-all duration-300 ease-in-out hover:scale-110 hover:shadow-xl hover:bg-gradient-to-r hover:from-blue-600 hover:to-purple-600 hover:shadow-blue-400/40 relative overflow-hidden"
+            >
+              <span className="absolute inset-0 bg-gradient-to-r from-transparent via-white/30 to-transparent translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-1000 ease-in-out"></span>
+              <span className="relative z-10 transition-all duration-300 group-hover:font-bold">Get Started</span>
             </Button>
           </Link>
-          <Link href="/demo-video">
-            <Button size="lg" className="px-8" variant="outline">
-              Watch Demo
+          <Link href="/demo-video" className="group">
+            <Button 
+              size="lg" 
+              className="px-8 transition-all duration-300 ease-in-out hover:scale-105 hover:shadow-lg hover:border-blue-400 hover:bg-blue-50 hover:text-blue-700 group-hover:shadow-blue-300/50" 
+              variant="outline"
+            >
+              <span className="transition-all duration-300 group-hover:font-semibold">Watch Demo</span>
             </Button>
           </Link>
         </div>

@@ -9,6 +9,7 @@ import { Plus } from "lucide-react";
 import { getCurrentBudget } from "@/actions/budget";
 import { BudgetProgress } from "./_components/budget-progress";
 import { DashboardOverview } from "./_components/dashboard-overview";
+import { ChartTest } from "@/components/chart-test";
 
 // Create the async component for the dashboard content
 async function DashboardContent() {
@@ -67,10 +68,10 @@ async function DashboardContent() {
           </div>
           <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
             <CreateAccountDrawer>
-              <Card className="hover:shadow-md transition-shadow cursor-pointer border-dashed">
-                <CardContent className="flex flex-col items-center justify-center text-muted-foreground h-full pt-5">
-                  <Plus className="h-10 w-10 mb-2" />
-                  <p className="text-sm font-medium">Add New Account</p>
+              <Card className="group hover:shadow-xl transition-all duration-300 ease-in-out cursor-pointer border-dashed hover:border-blue-400 hover:bg-gradient-to-br hover:from-blue-50 hover:to-purple-50 hover:scale-105">
+                <CardContent className="flex flex-col items-center justify-center text-muted-foreground h-full pt-5 group-hover:text-blue-600">
+                  <Plus className="h-10 w-10 mb-2 transition-all duration-300 group-hover:scale-110 group-hover:rotate-90 group-hover:text-blue-600" />
+                  <p className="text-sm font-medium transition-all duration-300 group-hover:font-semibold group-hover:text-blue-700">Add New Account</p>
                 </CardContent>
               </Card>
             </CreateAccountDrawer>
@@ -80,6 +81,9 @@ async function DashboardContent() {
               ))}
           </div>
         </div>
+        
+        {/* Temporary Chart Test */}
+        <ChartTest />
       </div>
     );
   } catch (error) {

@@ -30,11 +30,11 @@ const LandingPage: React.FC = () => {
             {featuresData.map((feature, index) => {
               const Icon = feature.icon;
               return (
-                <Card className="p-6 hover:shadow-lg transition-shadow" key={index}>
+                <Card className="group p-6 hover:shadow-xl transition-all duration-300 ease-in-out hover:scale-105 hover:bg-gradient-to-br hover:from-blue-50 hover:to-purple-50 hover:border-blue-300" key={index}>
                   <CardContent className="space-y-4 pt-4">
-                    <Icon className="h-8 w-8 text-blue-600" />
-                    <h3 className="text-xl font-semibold">{feature.title}</h3>
-                    <p className="text-sm sm:text-base text-gray-600 text-center sm:text-left leading-relaxed">
+                    <Icon className="h-8 w-8 text-blue-600 transition-all duration-300 group-hover:scale-110 group-hover:text-blue-700 group-hover:rotate-12" />
+                    <h3 className="text-xl font-semibold transition-all duration-300 group-hover:text-blue-800 group-hover:font-bold">{feature.title}</h3>
+                    <p className="text-sm sm:text-base text-gray-600 text-center sm:text-left leading-relaxed transition-all duration-300 group-hover:text-blue-700">
                       {feature.description}
                     </p>
                   </CardContent>
@@ -53,12 +53,12 @@ const LandingPage: React.FC = () => {
             {howItWorksData.map((step, index) => {
               const Icon = step.icon;
               return (
-                <div key={index} className="text-center">
-                  <div className="w-16 h-16 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-6">
-                    <Icon className="h-8 w-8 text-blue-600" />
+                <div key={index} className="group text-center hover:scale-105 transition-all duration-300 ease-in-out cursor-pointer">
+                  <div className="w-16 h-16 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-6 transition-all duration-300 group-hover:bg-blue-200 group-hover:scale-110 group-hover:shadow-lg">
+                    <Icon className="h-8 w-8 text-blue-600 transition-all duration-300 group-hover:scale-110 group-hover:text-blue-700 group-hover:rotate-12" />
                   </div>
-                  <h3 className="text-xl font-semibold mb-4">{step.title}</h3>
-                  <p className="text-gray-600">{step.description}</p>
+                  <h3 className="text-xl font-semibold mb-4 transition-all duration-300 group-hover:text-blue-800 group-hover:font-bold">{step.title}</h3>
+                  <p className="text-gray-600 transition-all duration-300 group-hover:text-blue-700">{step.description}</p>
                 </div>
               );
             })}
@@ -76,18 +76,18 @@ const LandingPage: React.FC = () => {
               {userBenefitsData.map((benefit, index) => {
                 const Icon = benefit.icon;
                 return (
-              <Card key={index} className="p-4 sm:p-6 hover:shadow-lg transition-shadow duration-300">
+              <Card key={index} className="group p-4 sm:p-6 hover:shadow-xl transition-all duration-300 ease-in-out hover:scale-105 hover:bg-gradient-to-br hover:from-blue-50 hover:to-purple-50 hover:border-blue-300">
                 <CardContent className="pt-4 text-center">
                   <div className="flex justify-center mb-3 sm:mb-4">
-                  <Icon className="h-8 w-8 text-blue-600" />
+                  <Icon className="h-8 w-8 text-blue-600 transition-all duration-300 group-hover:scale-110 group-hover:text-blue-700 group-hover:rotate-12" />
                   </div>
-                  <h3 className="text-lg sm:text-xl font-semibold mb-3 sm:mb-4">
+                  <h3 className="text-lg sm:text-xl font-semibold mb-3 sm:mb-4 transition-all duration-300 group-hover:text-blue-800 group-hover:font-bold">
                     {benefit.title}
                   </h3>
-                  <p className="text-sm sm:text-base text-gray-600 mb-4 leading-relaxed">
+                  <p className="text-sm sm:text-base text-gray-600 mb-4 leading-relaxed transition-all duration-300 group-hover:text-blue-700">
                     {benefit.description}
                   </p>
-                  <div className="text-xs sm:text-sm font-semibold text-blue-600 bg-blue-50 px-3 py-1 rounded-full inline-block">
+                  <div className="text-xs sm:text-sm font-semibold text-blue-600 bg-blue-50 px-3 py-1 rounded-full inline-block transition-all duration-300 group-hover:bg-blue-200 group-hover:scale-105 group-hover:font-bold">
                     {benefit.benefit}
                   </div>
                 </CardContent>
@@ -125,12 +125,13 @@ const LandingPage: React.FC = () => {
           <p className="text-blue-100 mb-8 max-w-2xl mx-auto">
             Start managing your finances smarter with AI-powered insights and automated tracking
           </p>
-          <Link href="/dashboard">
+          <Link href="/dashboard" className="group">
           <Button
               size="lg"
-              className="bg-white text-blue-600 hover:bg-blue-50 transition-colors duration-300 text-sm sm:text-base px-6 sm:px-8 py-3 sm:py-4"
+              className="bg-white text-blue-600 hover:bg-blue-50 transition-all duration-300 ease-in-out text-sm sm:text-base px-6 sm:px-8 py-3 sm:py-4 hover:scale-110 hover:shadow-xl hover:shadow-white/30 relative overflow-hidden group-hover:shadow-2xl"
             >
-              Start Free Trial
+              <span className="absolute inset-0 bg-gradient-to-r from-transparent via-blue-100/50 to-transparent translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-700 ease-in-out"></span>
+              <span className="relative z-10 transition-all duration-300 group-hover:font-bold">Start Free Trial</span>
             </Button>
           </Link>
         </div>
