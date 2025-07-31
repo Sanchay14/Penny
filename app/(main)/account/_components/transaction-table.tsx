@@ -414,7 +414,7 @@ export function TransactionTable({ transactions }: TransactionTableProps) {
                     {typeof transaction.amount === 'number' 
                       ? transaction.amount.toFixed(2)
                       : (typeof transaction.amount === 'object' && transaction.amount && 'toNumber' in transaction.amount)
-                        ? (transaction.amount as any).toNumber().toFixed(2)
+                        ? (transaction.amount as { toNumber: () => number }).toNumber().toFixed(2)
                         : (Number(transaction.amount) || 0).toFixed(2)
                     }
                   </TableCell>

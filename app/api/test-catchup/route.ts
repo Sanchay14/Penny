@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { db } from "@/lib/prisma";
+import { Transaction, Account } from "@prisma/client";
 
 // Test function to calculate missed occurrences (same as in functions.ts)
 function calculateNextRecurringDate(date: Date, interval: string): Date {
@@ -21,7 +22,7 @@ function calculateNextRecurringDate(date: Date, interval: string): Date {
   return next;
 }
 
-function calculateMissedOccurrences(transaction: any): Date[] {
+function calculateMissedOccurrences(transaction: Transaction & { account: Account }): Date[] {
   const occurrences: Date[] = [];
   
   if (!transaction.recurringInterval) {
@@ -49,7 +50,7 @@ function calculateMissedOccurrences(transaction: any): Date[] {
   return occurrences;
 }
 
-export async function POST(request: NextRequest) {
+export async function POST() {
   try {
     console.log("Testing catch-up functionality for recurring transactions");
     

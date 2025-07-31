@@ -3,7 +3,7 @@ import { db } from "@/lib/prisma";
 import EmailTemplate from "@/emails/tempelate";
 import { sendEmail } from "@/actions/send-email";
 import { GoogleGenerativeAI } from "@google/generative-ai";
-import { Transaction, Budget, User, Account, RecurringInterval, TransactionType } from "@prisma/client";
+import { Transaction, Budget, User, Account, RecurringInterval } from "@prisma/client";
 
 // Type definitions to ensure type safety
 interface MonthlyStats {

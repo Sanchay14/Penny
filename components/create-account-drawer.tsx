@@ -90,7 +90,7 @@ export function CreateAccountDrawer({ children }: CreateAccountDrawerProps) {
         </DrawerHeader>
 
         <div className="px-4 pb-4">
-          <form onSubmit={handleSubmit(onSubmit as any)} className="space-y-4">
+          <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
             {/* Name */}
             <div className="space-y-2">
               <label
