@@ -4,6 +4,7 @@ import { db } from "@/lib/prisma";
 import { auth } from "@clerk/nextjs/server";
 import { revalidatePath } from "next/cache";
 import { Account, Transaction, User } from "@prisma/client";
+import { unstable_cache } from "next/cache";
 
 // Extended Account type with transactions and count
 interface AccountWithTransactions extends Account {
@@ -36,16 +37,42 @@ const serializeDecimal = <T extends Record<string, any>>(obj: T): T & {
 } => {
   const serialized = { ...obj };
   
-  if (obj.balance && typeof obj.balance === "object" && typeof (obj.balance as any).toNumber === "function") {
-    (serialized as any).balance = (obj.balance as any).toNumber();
+  if (obj.balance !== null && obj.balance !== undefined) {
+    if (typeof obj.balance === "object" && typeof (obj.balance as any).toNumber === "function") {
+      (serialized as any).balance = (obj.balance as any).toNumber();
+    } else if (typeof obj.balance === "string") {
+      (serialized as any).balance = parseFloat(obj.balance);
+    } else if (typeof obj.balance === "number") {
+      (serialized as any).balance = obj.balance;
+    }
   }
   
-  if (obj.amount && typeof obj.amount === "object" && typeof (obj.amount as any).toNumber === "function") {
-    (serialized as any).amount = (obj.amount as any).toNumber();
+  if (obj.amount !== null && obj.amount !== undefined) {
+    if (typeof obj.amount === "object" && typeof (obj.amount as any).toNumber === "function") {
+      (serialized as any).amount = (obj.amount as any).toNumber();
+    } else if (typeof obj.amount === "string") {
+      (serialized as any).amount = parseFloat(obj.amount);
+    } else if (typeof obj.amount === "number") {
+      (serialized as any).amount = obj.amount;
+    }
   }
   
   return serialized;
 };
+
+// Helper function to get user with caching
+const getCachedUser = unstable_cache(
+  async (clerkUserId: string) => {
+    return await db.user.findUnique({
+      where: { clerkUserId },
+    });
+  },
+  ['user-by-clerk-id'],
+  {
+    revalidate: 300, // 5 minutes
+    tags: ['user'],
+  }
+);
 
 export async function getAccountWithTransactions(
   accountId: string
@@ -53,26 +80,37 @@ export async function getAccountWithTransactions(
   const { userId } = await auth();
   if (!userId) throw new Error("Unauthorized");
 
-  const user = await db.user.findUnique({
-    where: { clerkUserId: userId },
-  });
+  const user = await getCachedUser(userId);
 
   if (!user) throw new Error("User not found");
 
-  const account = await db.account.findUnique({
-    where: {
-      id: accountId,
-      userId: user.id,
+  // Cache the account query
+  const getAccountData = unstable_cache(
+    async (accountId: string, userId: string) => {
+      return await db.account.findUnique({
+        where: {
+          id: accountId,
+          userId: userId,
+        },
+        include: {
+          transactions: {
+            orderBy: { date: "desc" },
+            take: 50, // Limit transactions to improve performance
+          },
+          _count: {
+            select: { transactions: true },
+          },
+        },
+      });
     },
-    include: {
-      transactions: {
-        orderBy: { date: "desc" },
-      },
-      _count: {
-        select: { transactions: true },
-      },
-    },
-  });
+    [`account-${accountId}`],
+    {
+      revalidate: 60, // 1 minute
+      tags: [`account-${accountId}`, 'accounts'],
+    }
+  );
+
+  const account = await getAccountData(accountId, user.id);
 
   if (!account) return null;
 

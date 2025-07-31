@@ -136,7 +136,18 @@ export function TransactionTable({ transactions }: TransactionTableProps) {
           comparison = new Date(a.date).getTime() - new Date(b.date).getTime();
           break;
         case "amount":
-          comparison = a.amount - b.amount;
+          // Handle potential Decimal amounts in sorting
+          const amountA = typeof a.amount === 'number' 
+            ? a.amount 
+            : (typeof a.amount === 'object' && a.amount && 'toNumber' in a.amount)
+              ? (a.amount as any).toNumber()
+              : Number(a.amount) || 0;
+          const amountB = typeof b.amount === 'number' 
+            ? b.amount 
+            : (typeof b.amount === 'object' && b.amount && 'toNumber' in b.amount)
+              ? (b.amount as any).toNumber()
+              : Number(b.amount) || 0;
+          comparison = amountA - amountB;
           break;
         case "category":
           comparison = a.category.localeCompare(b.category);
@@ -400,7 +411,12 @@ export function TransactionTable({ transactions }: TransactionTableProps) {
                     )}
                   >
                     {transaction.type === "EXPENSE" ? "-" : "+"}₹
-                    {transaction.amount.toFixed(2)}
+                    {typeof transaction.amount === 'number' 
+                      ? transaction.amount.toFixed(2)
+                      : (typeof transaction.amount === 'object' && transaction.amount && 'toNumber' in transaction.amount)
+                        ? (transaction.amount as any).toNumber().toFixed(2)
+                        : (Number(transaction.amount) || 0).toFixed(2)
+                    }
                   </TableCell>
                   <TableCell>
                     {transaction.isRecurring ? (

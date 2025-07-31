@@ -20,6 +20,7 @@ model User {
   createdAt     DateTime      @default(now())
   updatedAt     DateTime      @updatedAt
 
+  @@index([clerkUserId]) // Add index for faster Clerk user lookups
   @@map("users")
 }
 
@@ -50,6 +51,7 @@ model Transaction {
   isRecurring      Boolean           @default(false)
   recurringInterval RecurringInterval? // Only used if isRecurring is true
   nextRecurringDate DateTime?         // Next date for recurring transaction
+  lastProcessed    DateTime?         // Last time this recurring transaction was processed
   status           TransactionStatus  @default(COMPLETED)
   notes            String?
   userId           String
@@ -61,6 +63,11 @@ model Transaction {
 
   @@index([userId])
   @@index([accountId])
+  @@index([date]) // Add index for date-based queries
+  @@index([userId, date]) // Composite index for user + date queries
+  @@index([accountId, date]) // Composite index for account + date queries
+  @@index([type]) // Add index for transaction type filtering
+  @@index([category]) // Add index for category-based queries
   @@map("transactions")
 }
 

@@ -5,6 +5,9 @@ import { db } from "@/lib/prisma";
 import { revalidatePath } from "next/cache";
 import { GoogleGenerativeAI } from "@google/generative-ai";
 import { Account, Transaction, User } from "@prisma/client";
+import { request } from "@arcjet/next";
+import aj from "@/lib/arcjet";
+import { th } from "date-fns/locale";
 
 // Initialize Gemini AI
 const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY!);
@@ -71,7 +74,26 @@ export async function createTransaction(data: CreateTransactionData): Promise<Tr
   try {
     const { userId } = await auth();
     if (!userId) throw new Error("Unauthorized");
+    
+    const req = await request();
+    const decision = await aj.protect(req, {
+      userId,
+      requested: 1,
+    });
+    
+    if (decision.isDenied()) {
+      if (decision.reason.isRateLimit()) {
+        const { remaining, reset } = decision.reason;
+        console.error({
+          code: "RATE_LIMIT",
+          message: `Rate limit exceeded. Try again in ${reset} seconds.`,     
+        });
 
+        throw new Error(`Rate limit exceeded. Try again in ${reset} seconds.`);
+      }
+      throw new Error("Request denied by Arcjet");
+    }
+    
     const user = await db.user.findUnique({
       where: { clerkUserId: userId },
     });

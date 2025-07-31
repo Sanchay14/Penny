@@ -86,10 +86,18 @@ export function AccountChart({ transactions }: AccountChartProps): React.ReactEl
       if (!acc[date]) {
         acc[date] = { date, income: 0, expense: 0 };
       }
+      
+      // Ensure amount is a number, handle potential Decimal objects
+      const amount = typeof transaction.amount === 'number' 
+        ? transaction.amount 
+        : (typeof transaction.amount === 'object' && transaction.amount && 'toNumber' in transaction.amount)
+          ? (transaction.amount as any).toNumber()
+          : Number(transaction.amount) || 0;
+      
       if (transaction.type === "INCOME") {
-        acc[date].income += transaction.amount;
+        acc[date].income += amount;
       } else {
-        acc[date].expense += transaction.amount;
+        acc[date].expense += amount;
       }
       return acc;
     }, {});
@@ -145,25 +153,25 @@ export function AccountChart({ transactions }: AccountChartProps): React.ReactEl
           <div className="text-center">
             <p className="text-muted-foreground">Total Income</p>
             <p className="text-lg font-bold text-green-500">
-              ₹{totals.income.toFixed(2)}
+              ₹{(totals.income || 0).toFixed(2)}
             </p>
           </div>
           <div className="text-center">
             <p className="text-muted-foreground">Total Expenses</p>
             <p className="text-lg font-bold text-red-500">
-              ₹{totals.expense.toFixed(2)}
+              ₹{(totals.expense || 0).toFixed(2)}
             </p>
           </div>
           <div className="text-center">
             <p className="text-muted-foreground">Net</p>
             <p
               className={`text-lg font-bold ${
-                totals.income - totals.expense >= 0
+                (totals.income || 0) - (totals.expense || 0) >= 0
                   ? "text-green-500"
                   : "text-red-500"
               }`}
             >
-              ₹{(totals.income - totals.expense).toFixed(2)}
+              ₹{((totals.income || 0) - (totals.expense || 0)).toFixed(2)}
             </p>
           </div>
         </div>

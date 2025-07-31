@@ -6,7 +6,8 @@ import { notFound } from "next/navigation";
 import { AccountChart } from "../_components/account-chart";
 
 export default async function AccountPage({ params}:any) {
-  const accountData = await getAccountWithTransactions(params.id);
+  const { id } = await params;
+  const accountData = await getAccountWithTransactions(id);
 
   if (!accountData) {
     notFound();
@@ -30,7 +31,7 @@ export default async function AccountPage({ params}:any) {
 
         <div className="text-right pb-2">
           <div className="text-xl sm:text-2xl font-bold">
-            ₹{account.balance.toFixed(2)}
+            ₹{typeof account.balance === 'number' ? account.balance.toFixed(2) : parseFloat(String(account.balance || 0)).toFixed(2)}
           </div>
           <p className="text-sm text-muted-foreground">
             {account._count.transactions} Transactions
