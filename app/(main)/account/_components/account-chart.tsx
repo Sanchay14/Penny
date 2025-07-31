@@ -82,7 +82,15 @@ export function AccountChart({ transactions }: AccountChartProps): React.ReactEl
 
     // Group transactions by date
     const grouped = filtered.reduce((acc: Record<string, ChartData>, transaction: Transaction): Record<string, ChartData> => {
-      const date = format(new Date(transaction.date), "MMM dd");
+      const transactionDate = new Date(transaction.date);
+      const currentYear = now.getFullYear();
+      
+      // For all-time view or if transaction is from a different year, include year in format
+      const dateFormat = (dateRange === "ALL" || transactionDate.getFullYear() !== currentYear) 
+        ? "MMM dd, yyyy" 
+        : "MMM dd";
+      
+      const date = format(transactionDate, dateFormat);
       if (!acc[date]) {
         acc[date] = { date, income: 0, expense: 0 };
       }
@@ -102,9 +110,14 @@ export function AccountChart({ transactions }: AccountChartProps): React.ReactEl
       return acc;
     }, {});
 
-    // Convert to array and sort by date
+    // Convert to array and sort by actual date
     return Object.values(grouped).sort(
-      (a: ChartData, b: ChartData): number => new Date(a.date).getTime() - new Date(b.date).getTime()
+      (a: ChartData, b: ChartData): number => {
+        // Parse the date strings back to Date objects for proper sorting
+        const dateA = new Date(a.date);
+        const dateB = new Date(b.date);
+        return dateA.getTime() - dateB.getTime();
+      }
     );
   }, [transactions, dateRange]);
 
