@@ -124,8 +124,8 @@ export async function createTransaction(data: CreateTransactionData): Promise<Tr
           ...data,
           userId: user.id,
           nextRecurringDate:
-            data.isRecurring && data.recurringInterval
-              ? calculateNextRecurringDate(data.date, data.recurringInterval)
+            data.isRecurring && data.recurringInterval && data.date
+              ? calculateNextRecurringDate(data.date as string | Date, data.recurringInterval)
               : null,
         },
       });
@@ -140,6 +140,136 @@ export async function createTransaction(data: CreateTransactionData): Promise<Tr
 
     revalidatePath("/dashboard");
     revalidatePath(`/account/${transaction.accountId}`);
+
+    return { success: true, data: serializeAmount(transaction) };
+  } catch (error: any) {
+    throw new Error(error.message);
+  }
+}
+
+
+// Get Single Transaction
+export async function getTransaction(id: string): Promise<{ success: boolean; data: SerializedTransaction }> {
+  try {
+    const { userId } = await auth();
+    if (!userId) throw new Error("Unauthorized");
+
+    const user = await db.user.findUnique({
+      where: { clerkUserId: userId },
+    });
+
+    if (!user) throw new Error("User not found");
+
+    const transaction = await db.transaction.findUnique({
+      where: {
+        id,
+        userId: user.id,
+      },
+    });
+
+    if (!transaction) throw new Error("Transaction not found");
+
+    return { success: true, data: serializeAmount(transaction) };
+  } catch (error: any) {
+    throw new Error(error.message);
+  }
+}
+
+export async function updateTransaction(id: string, data: Partial<CreateTransactionData>): Promise<TransactionResponse> {
+  try {
+    const { userId } = await auth();
+    if (!userId) throw new Error("Unauthorized");
+
+    const user = await db.user.findUnique({
+      where: { clerkUserId: userId },
+    });
+
+    if (!user) throw new Error("User not found");
+
+    // Get original transaction to calculate balance change
+    const originalTransaction = await db.transaction.findUnique({
+      where: {
+        id,
+        userId: user.id,
+      },
+      include: {
+        account: true,
+      },
+    });
+
+    if (!originalTransaction) throw new Error("Transaction not found");
+
+    // Calculate balance changes
+    const oldBalanceChange =
+      originalTransaction.type === "EXPENSE"
+        ? -originalTransaction.amount.toNumber()
+        : originalTransaction.amount.toNumber();
+
+    const newBalanceChange =
+      data.type === "EXPENSE" ? -(data.amount ?? 0) : (data.amount ?? 0);
+
+    const netBalanceChange = newBalanceChange - oldBalanceChange;
+    
+    // Determine which account to update (could be the same or different)
+    const targetAccountId = data.accountId ?? originalTransaction.accountId;
+
+    // Update transaction and account balance in a transaction
+    const transaction = await db.$transaction(async (tx) => {
+      const updated = await tx.transaction.update({
+        where: {
+          id,
+          userId: user.id,
+        },
+        data: {
+          ...data,
+          nextRecurringDate:
+            data.isRecurring && data.recurringInterval && data.date
+              ? calculateNextRecurringDate(data.date as string | Date, data.recurringInterval)
+              : null,
+        },
+      });
+
+      // If account changed, we need to adjust both accounts
+      if (data.accountId && data.accountId !== originalTransaction.accountId) {
+        // Remove from old account
+        await tx.account.update({
+          where: { id: originalTransaction.accountId },
+          data: {
+            balance: {
+              increment: -oldBalanceChange, // Reverse the original change
+            },
+          },
+        });
+
+        // Add to new account
+        await tx.account.update({
+          where: { id: data.accountId },
+          data: {
+            balance: {
+              increment: newBalanceChange,
+            },
+          },
+        });
+      } else {
+        // Same account, just apply the net change
+        await tx.account.update({
+          where: { id: targetAccountId },
+          data: {
+            balance: {
+              increment: netBalanceChange,
+            },
+          },
+        });
+      }
+
+      return updated;
+    });
+
+    revalidatePath("/dashboard");
+    revalidatePath(`/account/${targetAccountId}`);
+    if (data.accountId && data.accountId !== originalTransaction.accountId) {
+      revalidatePath(`/account/${originalTransaction.accountId}`);
+    }
 
     return { success: true, data: serializeAmount(transaction) };
   } catch (error: any) {

@@ -29,7 +29,7 @@ import {
 import { Calendar } from "@/components/ui/calendar";
 import { CreateAccountDrawer } from "@/components/create-account-drawer";
 import { cn } from "@/lib/utils";
-import { createTransaction, scanReceipt } from "@/actions/transaction";
+import { createTransaction, updateTransaction, scanReceipt } from "@/actions/transaction";
 
 // Types
 interface Account {
@@ -63,6 +63,22 @@ interface TransactionResponse {
 interface AddTransactionFormProps {
   accounts: Account[];
   categories: Category[];
+  editMode?: boolean;
+  initialData?: SerializedTransaction | null;
+  editId?: string;
+}
+
+interface SerializedTransaction {
+  id: string;
+  type: "INCOME" | "EXPENSE";
+  amount: number;
+  description: string | null;
+  date: Date;
+  accountId: string;
+  category: string;
+  isRecurring: boolean;
+  recurringInterval: "DAILY" | "WEEKLY" | "MONTHLY" | "YEARLY" | null;
+  notes: string | null;
 }
 
 // Validation Schema
@@ -92,7 +108,13 @@ const transactionSchema = z
 
 type TransactionFormData = z.infer<typeof transactionSchema>;
 
-export function AddTransactionForm({ accounts, categories }: AddTransactionFormProps) {
+export function AddTransactionForm({ 
+  accounts, 
+  categories, 
+  editMode = false, 
+  initialData = null, 
+  editId 
+}: AddTransactionFormProps) {
   const router = useRouter();
   const fileInputRef = useRef<HTMLInputElement>(null);
 
@@ -106,7 +128,17 @@ export function AddTransactionForm({ accounts, categories }: AddTransactionFormP
     setValue,
   } = useForm<TransactionFormData>({
     resolver: zodResolver(transactionSchema),
-    defaultValues: {
+    defaultValues: editMode && initialData ? {
+      type: initialData.type,
+      amount: initialData.amount,
+      description: initialData.description,
+      date: new Date(initialData.date),
+      isRecurring: initialData.isRecurring,
+      notes: initialData.notes,
+      accountId: initialData.accountId,
+      category: initialData.category,
+      recurringInterval: initialData.recurringInterval || undefined,
+    } : {
       type: "EXPENSE",
       amount: 0.01,
       description: null,
@@ -126,13 +158,23 @@ export function AddTransactionForm({ accounts, categories }: AddTransactionFormP
   } = useFetch<TransactionResponse, [TransactionFormData]>(createTransaction);
 
   const {
+    loading: updateTransactionLoading,
+    fn: updateTransactionFn,
+    data: updatedTransaction,
+  } = useFetch<TransactionResponse, [string, TransactionFormData]>(updateTransaction);
+
+  const {
     loading: scanReceiptLoading,
     fn: scanReceiptFn,
     data: scannedData,
   } = useFetch<ReceiptScanResult, [File]>(scanReceipt);
 
   const onSubmit = async (data: TransactionFormData): Promise<void> => {
-    await createTransactionFn(data);
+    if (editMode && editId) {
+      await updateTransactionFn(editId, data);
+    } else {
+      await createTransactionFn(data);
+    }
   };
 
   const handleReceiptScan = async (file: File): Promise<void> => {
@@ -164,11 +206,15 @@ export function AddTransactionForm({ accounts, categories }: AddTransactionFormP
   const date = watch("date");
 
   useEffect(() => {
-    if (newTransaction && newTransaction.success && !createTransactionLoading) {
-      toast.success("Transaction created successfully");
-      router.push(`/account/${newTransaction.data.accountId}`);
+    const transactionResult = editMode ? updatedTransaction : newTransaction;
+    const isLoading = editMode ? updateTransactionLoading : createTransactionLoading;
+    
+    if (transactionResult && transactionResult.success && !isLoading) {
+      const successMessage = editMode ? "Transaction updated successfully" : "Transaction created successfully";
+      toast.success(successMessage);
+      router.push(`/account/${transactionResult.data.accountId}`);
     }
-  }, [newTransaction, createTransactionLoading, router]);
+  }, [newTransaction, updatedTransaction, createTransactionLoading, updateTransactionLoading, editMode, router]);
 
   const filteredCategories = categories.filter(
     (category) => category.type === type
@@ -176,46 +222,48 @@ export function AddTransactionForm({ accounts, categories }: AddTransactionFormP
 
   return (
     <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
-      {/* Receipt Scanner */}
-      <div className="flex items-center gap-4">
-        <input
-          type="file"
-          ref={fileInputRef}
-          className="hidden"
-          accept="image/*"
-          capture="environment"
-          onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
-            const file = e.target.files?.[0];
-            if (file) handleReceiptScan(file);
-          }}
-        />
-        <Button
-          type="button"
-          variant="outline"
-          className="w-full h-10 bg-gradient-to-br from-orange-500 via-pink-500 to-purple-500 animate-gradient hover:opacity-90 transition-opacity text-white hover:text-white"
-          onClick={() => fileInputRef.current?.click()}
-          disabled={!!scanReceiptLoading}
-        >
-          {scanReceiptLoading ? (
-            <>
-              <Loader2 className="mr-2 animate-spin" />
-              <span>Scanning Receipt...</span>
-            </>
-          ) : (
-            <>
-              <Camera className="mr-2" />
-              <span>Scan Receipt with AI</span>
-            </>
-          )}
-        </Button>
-      </div>
+      {/* Receipt Scanner - Only show in create mode */}
+      {!editMode && (
+        <div className="flex items-center gap-4">
+          <input
+            type="file"
+            ref={fileInputRef}
+            className="hidden"
+            accept="image/*"
+            capture="environment"
+            onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
+              const file = e.target.files?.[0];
+              if (file) handleReceiptScan(file);
+            }}
+          />
+          <Button
+            type="button"
+            variant="outline"
+            className="w-full h-10 bg-gradient-to-br from-orange-500 via-pink-500 to-purple-500 animate-gradient hover:opacity-90 transition-opacity text-white hover:text-white"
+            onClick={() => fileInputRef.current?.click()}
+            disabled={!!scanReceiptLoading}
+          >
+            {scanReceiptLoading ? (
+              <>
+                <Loader2 className="mr-2 animate-spin" />
+                <span>Scanning Receipt...</span>
+              </>
+            ) : (
+              <>
+                <Camera className="mr-2" />
+                <span>Scan Receipt with AI</span>
+              </>
+            )}
+          </Button>
+        </div>
+      )}
 
       {/* Type */}
       <div className="space-y-2">
         <label className="text-sm font-medium">Type</label>
         <Select
           onValueChange={(value: "INCOME" | "EXPENSE") => setValue("type", value)}
-          defaultValue={type}
+          value={watch("type")}
         >
           <SelectTrigger>
             <SelectValue placeholder="Select type" />
@@ -251,7 +299,6 @@ export function AddTransactionForm({ accounts, categories }: AddTransactionFormP
           <Select
             value={watch("accountId")}
             onValueChange={(value: string) => setValue("accountId", value)}
-            defaultValue={accounts.find((ac) => ac.isDefault)?.id}
           >
             <SelectTrigger>
               <SelectValue placeholder="Select account" />
@@ -281,7 +328,10 @@ export function AddTransactionForm({ accounts, categories }: AddTransactionFormP
       {/* Category */}
       <div className="space-y-2">
         <label className="text-sm font-medium">Category</label>
-        <Select onValueChange={(value: string) => setValue("category", value)}>
+        <Select 
+          onValueChange={(value: string) => setValue("category", value)}
+          value={watch("category")}
+        >
           <SelectTrigger>
             <SelectValue
               placeholder={scannedData?.category || "Select category"}
@@ -364,6 +414,7 @@ export function AddTransactionForm({ accounts, categories }: AddTransactionFormP
             onValueChange={(value: "DAILY" | "WEEKLY" | "MONTHLY" | "YEARLY") =>
               setValue("recurringInterval", value)
             }
+            value={watch("recurringInterval") || ""}
           >
             <SelectTrigger>
               <SelectValue placeholder="Select interval" />
@@ -401,15 +452,15 @@ export function AddTransactionForm({ accounts, categories }: AddTransactionFormP
         <Button
           type="submit"
           className="w-48"
-          disabled={!!createTransactionLoading}
+          disabled={!!(editMode ? updateTransactionLoading : createTransactionLoading)}
         >
-          {createTransactionLoading ? (
+          {(editMode ? updateTransactionLoading : createTransactionLoading) ? (
             <>
               <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-              Creating...
+              {editMode ? "Updating..." : "Creating..."}
             </>
           ) : (
-            "Create Transaction"
+            editMode ? "Update Transaction" : "Create Transaction"
           )}
         </Button>
         <Button
