@@ -1,7 +1,7 @@
 // app/dashboard/page.tsx
 import { Suspense } from "react";
 import { BarLoader } from "react-spinners";
-import { getUserAccounts, getDashboardData } from "@/actions/dashboard";
+import { getDashboardData } from "@/actions/dashboard";
 import { AccountCard } from "./_components/account-card";
 import { CreateAccountDrawer } from "@/components/create-account-drawer";
 import { Card, CardContent } from "@/components/ui/card";

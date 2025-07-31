@@ -99,7 +99,7 @@ export function AccountChart({ transactions }: AccountChartProps): React.ReactEl
       const amount = typeof transaction.amount === 'number' 
         ? transaction.amount 
         : (typeof transaction.amount === 'object' && transaction.amount && 'toNumber' in transaction.amount)
-          ? (transaction.amount as any).toNumber()
+          ? (transaction.amount as { toNumber(): number }).toNumber()
           : Number(transaction.amount) || 0;
       
       if (transaction.type === "INCOME") {

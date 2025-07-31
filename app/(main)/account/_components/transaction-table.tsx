@@ -140,12 +140,12 @@ export function TransactionTable({ transactions }: TransactionTableProps) {
           const amountA = typeof a.amount === 'number' 
             ? a.amount 
             : (typeof a.amount === 'object' && a.amount && 'toNumber' in a.amount)
-              ? (a.amount as any).toNumber()
+              ? (a.amount as { toNumber: () => number }).toNumber()
               : Number(a.amount) || 0;
           const amountB = typeof b.amount === 'number' 
             ? b.amount 
             : (typeof b.amount === 'object' && b.amount && 'toNumber' in b.amount)
-              ? (b.amount as any).toNumber()
+              ? (b.amount as { toNumber: () => number }).toNumber()
               : Number(b.amount) || 0;
           comparison = amountA - amountB;
           break;
@@ -440,7 +440,7 @@ export function TransactionTable({ transactions }: TransactionTableProps) {
                               <div className="font-medium">Next Date:</div>
                               <div>
                                 {format(
-                                  new Date(transaction.nextRecurringDate ?? ""),
+                                  new Date(transaction.nextRecurringDate || ""),
                                   "PPP"
                                 )}
                               </div>

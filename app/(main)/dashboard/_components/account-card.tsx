@@ -30,7 +30,7 @@ interface AccountCardProps {
 }
 
 export function AccountCard({ account }: AccountCardProps) {
-  const { name, type, balance, _count, id, isDefault } = account;
+  const { name, type, balance, id, isDefault } = account;
   const [isLoading, setIsLoading] = useState(false);
   const router = useRouter();
 
@@ -48,6 +48,7 @@ export function AccountCard({ account }: AccountCardProps) {
         toast.error(result.error || "Failed to update default account");
       }
     } catch (error) {
+      console.error("Failed to update default account:", error);
       toast.error("Failed to update default account");
     } finally {
       setIsLoading(false);

@@ -70,7 +70,7 @@ const LandingPage: React.FC = () => {
       <section id="benefits" className="py-12 sm:py-16 md:py-20">
         <div className="container mx-auto px-4 sm:px-6 lg:px-8">
           <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold text-center mb-12 sm:mb-16">
-            What You'll Love About Penyy
+            What You&apos;ll Love About Penyy
           </h2>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6 sm:gap-8">
               {userBenefitsData.map((benefit, index) => {

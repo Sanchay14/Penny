@@ -194,7 +194,7 @@ export function DashboardOverview({ transactions, accounts }: DashboardOverviewP
                       ))}
                     </Pie>
                     <Tooltip 
-                      formatter={(value: any) => [formatCurrency(value), "Amount"]}
+                      formatter={(value: number) => [formatCurrency(value), "Amount"]}
                     />
                     <Legend />
                   </PieChart>

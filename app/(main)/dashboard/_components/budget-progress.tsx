@@ -64,7 +64,7 @@ export function BudgetProgress({ initialBudget, currentExpenses }: BudgetProgres
 
   useEffect(() => {
     if (error) {
-      toast.error(typeof error === "string" ? error : (error as any)?.message || "Failed to update budget");
+      toast.error(typeof error === "string" ? error : (error as Error)?.message || "Failed to update budget");
     }
   }, [error]);
 
@@ -81,7 +81,7 @@ export function BudgetProgress({ initialBudget, currentExpenses }: BudgetProgres
                 <Input
                   type="number"
                   value={newBudget}
-                  onChange={(e) => setNewBudget(e.target.value)}
+                  onChange={(e: React.ChangeEvent<HTMLInputElement>) => setNewBudget(e.target.value)}
                   className="w-32"
                   placeholder="Enter amount"
                   autoFocus
