@@ -45,7 +45,8 @@ interface Props {
 }
 
 export default async function AddTransactionPage({ searchParams }: Props): Promise<React.ReactElement> {
-  const editId = searchParams.edit;
+  const resolvedSearchParams = await searchParams;
+  const editId = resolvedSearchParams.edit;
   const editMode = Boolean(editId);
 
   const accountsResponse: AccountsResponse = await getUserAccounts();

@@ -4,7 +4,7 @@
 import { db } from "@/lib/prisma";
 import { auth } from "@clerk/nextjs/server";
 import { revalidatePath } from "next/cache";
-import { Account, User, AccountType} from "@prisma/client";
+import { Account, User, AccountType, Transaction } from "@prisma/client";
 
 // Input interface for account creation
 interface CreateAccountInput {
@@ -16,6 +16,18 @@ interface CreateAccountInput {
   type?: string;
   [key: string]: any;
 }
+
+// Serialized transaction type
+interface SerializedTransaction extends Omit<Transaction, "amount"> {
+  amount: number;
+}
+
+// Dashboard data response
+interface DashboardData {
+  transactions: SerializedTransaction[];
+  accounts: (Omit<Account, "balance"> & { balance: number; _count: { transactions: number } })[];
+}
+
 function isValidAccountType(value: any): value is AccountType {
   return Object.values(AccountType).includes(value);
 }
@@ -29,6 +41,148 @@ function serializeAccount(account: Account): Omit<Account, "balance"> & { balanc
   };
 }
 
+// Helper to serialize transaction amounts
+function serializeTransaction(transaction: Transaction): SerializedTransaction {
+  return {
+    ...transaction,
+    amount: typeof transaction.amount === "object" && typeof (transaction.amount as any).toNumber === "function"
+      ? (transaction.amount as any).toNumber()
+      : Number(transaction.amount),
+  };
+}
+
+// Get dashboard data including transactions and accounts
+export async function getDashboardData(): Promise<{ success: boolean; data?: DashboardData; error?: string }> {
+  try {
+    const { userId } = await auth();
+    if (!userId) {
+      return { success: false, error: "Unauthorized" };
+    }
+
+    const user = await db.user.findUnique({
+      where: { clerkUserId: userId },
+    });
+
+    if (!user) {
+      return { success: false, error: "User not found" };
+    }
+
+    // Fetch all transactions sorted by date descending
+    const transactions = await db.transaction.findMany({
+      where: { userId: user.id },
+      orderBy: { date: "desc" },
+    });
+
+    // Fetch all accounts with transaction counts
+    const accounts = await db.account.findMany({
+      where: { userId: user.id },
+      orderBy: { createdAt: "desc" },
+      include: {
+        _count: {
+          select: {
+            transactions: true,
+          },
+        },
+      },
+    });
+
+    const serializedTransactions = transactions.map(serializeTransaction);
+    const serializedAccounts = accounts.map((account) => ({
+      ...serializeAccount({
+        ...account,
+        userId: account.userId ?? "",
+      } as Account),
+      _count: account._count
+    }));
+
+    return { 
+      success: true, 
+      data: {
+        transactions: serializedTransactions,
+        accounts: serializedAccounts
+      }
+    };
+  } catch (error: any) {
+    console.error("Error in getDashboardData:", error);
+    return { success: false, error: error.message || "Failed to fetch dashboard data" };
+  }
+}
+
+
+// Get monthly expense statistics by category
+export async function getMonthlyStats(accountId?: string): Promise<{ 
+  success: boolean; 
+  data?: { category: string; amount: number; color: string }[]; 
+  error?: string 
+}> {
+  try {
+    const { userId } = await auth();
+    if (!userId) {
+      return { success: false, error: "Unauthorized" };
+    }
+
+    const user = await db.user.findUnique({
+      where: { clerkUserId: userId },
+    });
+
+    if (!user) {
+      return { success: false, error: "User not found" };
+    }
+
+    const now = new Date();
+    const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
+    const endOfMonth = new Date(now.getFullYear(), now.getMonth() + 1, 0, 23, 59, 59);
+
+    const whereClause: any = {
+      userId: user.id,
+      type: "EXPENSE",
+      date: {
+        gte: startOfMonth,
+        lte: endOfMonth,
+      },
+    };
+
+    if (accountId) {
+      whereClause.accountId = accountId;
+    }
+
+    const expenses = await db.transaction.findMany({
+      where: whereClause,
+      select: {
+        category: true,
+        amount: true,
+      },
+    });
+
+    // Group by category and sum amounts
+    const categoryMap = new Map<string, number>();
+    expenses.forEach((expense) => {
+      const amount = typeof expense.amount === "object" && typeof (expense.amount as any).toNumber === "function"
+        ? (expense.amount as any).toNumber()
+        : Number(expense.amount);
+      
+      const current = categoryMap.get(expense.category) || 0;
+      categoryMap.set(expense.category, current + amount);
+    });
+
+    // Convert to array with colors
+    const colors = [
+      "#8884d8", "#82ca9d", "#ffc658", "#ff7300", "#0088fe",
+      "#00c49f", "#ffbb28", "#ff8042", "#a4de6c", "#d084d0"
+    ];
+
+    const result = Array.from(categoryMap.entries()).map(([category, amount], index) => ({
+      category: category.charAt(0).toUpperCase() + category.slice(1).replace(/-/g, " "),
+      amount,
+      color: colors[index % colors.length],
+    }));
+
+    return { success: true, data: result };
+  } catch (error: any) {
+    console.error("Error in getMonthlyStats:", error);
+    return { success: false, error: error.message || "Failed to fetch monthly stats" };
+  }
+}
 
 // Get all accounts for a user - now cached
 export async function getUserAccounts(): Promise<{ success: boolean; data?: any[]; error?: string }> {

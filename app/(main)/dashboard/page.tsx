@@ -1,21 +1,24 @@
 // app/dashboard/page.tsx
 import { Suspense } from "react";
 import { BarLoader } from "react-spinners";
-import { getUserAccounts } from "@/actions/dashboard";
+import { getUserAccounts, getDashboardData } from "@/actions/dashboard";
 import { AccountCard } from "./_components/account-card";
 import { CreateAccountDrawer } from "@/components/create-account-drawer";
 import { Card, CardContent } from "@/components/ui/card";
 import { Plus } from "lucide-react";
 import { getCurrentBudget } from "@/actions/budget";
 import { BudgetProgress } from "./_components/budget-progress";
-// Create the async component for the accounts
-async function AccountsGrid() {
-  console.log("Fetching accounts");
+import { DashboardOverview } from "./_components/dashboard-overview";
+
+// Create the async component for the dashboard content
+async function DashboardContent() {
+  console.log("Fetching dashboard data");
   
   try {
-    const result = await getUserAccounts();
+    // Fetch dashboard data (transactions and accounts)
+    const dashboardResult = await getDashboardData();
     
-    if (!result.success) {
+    if (!dashboardResult.success) {
       return (
         <div className="flex items-center justify-center h-[400px]">
           <p className="text-muted-foreground">Something went wrong</p>
@@ -23,8 +26,9 @@ async function AccountsGrid() {
       );
     }
 
-    const accounts = result.data || [];
+    const { transactions, accounts } = dashboardResult.data || { transactions: [], accounts: [] };
     const defaultAccount = accounts.find((acc) => acc.isDefault);
+    
     let budgetData = null;
     if (defaultAccount) {
       const budgetResult = await getCurrentBudget(defaultAccount.id);
@@ -34,8 +38,17 @@ async function AccountsGrid() {
         console.error("Failed to fetch budget:", budgetResult.error);
       }
     }
+
     return (
       <div className="space-y-6 pb-16">
+        {/* Dashboard Overview Section */}
+        {accounts.length > 0 && transactions.length > 0 && (
+          <DashboardOverview 
+            transactions={transactions}
+            accounts={accounts}
+          />
+        )}
+
         {/* Budget Progress Section */}
         {defaultAccount && (
           <div className="mb-8">
@@ -90,11 +103,11 @@ export default function DashboardPage() {
         </h1>
       </div>
       
-      {/* Only the accounts grid is wrapped in Suspense */}
+      {/* Dashboard content wrapped in Suspense */}
       <Suspense
         fallback={<BarLoader className="mt-4" width={"100%"} color="#9333ea" />}
       >
-        <AccountsGrid />
+        <DashboardContent />
       </Suspense>
     </div>
   );
