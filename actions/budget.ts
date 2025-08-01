@@ -93,7 +93,10 @@ export async function getCurrentBudget(
 // Update or create budget
 export async function updateBudget(
   data: UpdateBudgetInput
-): Promise<{ success: boolean; data?: any; error?: string }> {
+): Promise<{ success: boolean; data?: any; error?: string; timestamp?: number; headers?: Record<string, string> }> {
+  // Force no caching for budget updates
+  noStore();
+  
   try {
     const { userId } = await auth();
     if (!userId) return { success: false, error: "Unauthorized" };
@@ -120,9 +123,33 @@ export async function updateBudget(
       },
     });
 
+    // Aggressive cache invalidation for budget updates
     revalidatePath("/dashboard");
+    revalidatePath("/dashboard", "layout");
+    revalidatePath("/dashboard", "page");
+    
+    // Revalidate all account pages since budget affects dashboard views
+    const accounts = await db.account.findMany({
+      where: { userId: user.id },
+      select: { id: true }
+    });
+    
+    for (const account of accounts) {
+      revalidatePath(`/account/${account.id}`);
+      revalidatePath(`/account/${account.id}`, "layout");
+    }
 
-    return { success: true, data: serializeBudget(budget) };
+    return { 
+      success: true, 
+      data: serializeBudget(budget),
+      timestamp: Date.now(), // Force cache bust
+      headers: {
+        'Cache-Control': 'no-store, no-cache, must-revalidate, proxy-revalidate, max-age=0',
+        'Pragma': 'no-cache',
+        'Expires': '0',
+        'Surrogate-Control': 'no-store',
+      }
+    };
   } catch (error: any) {
     console.error("Error updating budget:", error);
     return { success: false, error: error.message || "Failed to update budget" };

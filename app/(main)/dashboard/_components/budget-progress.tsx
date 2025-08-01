@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { Pencil, Check, X } from "lucide-react";
+import { useRouter } from "next/navigation";
 import useFetch from "@/hooks/use-fetch";
 import { toast } from "sonner";
 import { Budget } from "@prisma/client";
@@ -27,6 +28,8 @@ interface BudgetProgressProps {
 export function BudgetProgress({ initialBudget, currentExpenses }: BudgetProgressProps) {
   const [isEditing, setIsEditing] = useState(false);
   const [newBudget, setNewBudget] = useState(initialBudget?.amount?.toString() || "");
+  const [localBudget, setLocalBudget] = useState(initialBudget);
+  const router = useRouter();
 
   const {
     loading: isLoading,
@@ -35,8 +38,8 @@ export function BudgetProgress({ initialBudget, currentExpenses }: BudgetProgres
     error,
   } = useFetch(updateBudget);
 
-  const percentUsed = initialBudget
-    ? (currentExpenses / initialBudget.amount) * 100
+  const percentUsed = localBudget
+    ? (currentExpenses / localBudget.amount) * 100
     : 0;
 
   const handleUpdateBudget = async () => {
@@ -58,9 +61,15 @@ export function BudgetProgress({ initialBudget, currentExpenses }: BudgetProgres
   useEffect(() => {
     if (updatedBudget?.success) {
       setIsEditing(false);
+      // Update local state immediately for better UX
+      if (updatedBudget.data) {
+        setLocalBudget(updatedBudget.data);
+      }
       toast.success("Budget updated successfully");
+      // Force refresh to update the budget display
+      router.refresh();
     }
-  }, [updatedBudget]);
+  }, [updatedBudget, router]);
 
   useEffect(() => {
     if (error) {
@@ -107,8 +116,8 @@ export function BudgetProgress({ initialBudget, currentExpenses }: BudgetProgres
             ) : (
               <>
                 <CardDescription className="text-base text-blue-700 dark:text-blue-300">
-                  {initialBudget
-                    ? ` ₹${currentExpenses.toFixed(2)} of ₹ ${initialBudget.amount.toFixed(2)} spent`
+                  {localBudget
+                    ? ` ₹${currentExpenses.toFixed(2)} of ₹ ${localBudget.amount.toFixed(2)} spent`
                     : "No budget set - Click to add one"}
                 </CardDescription>
                 <Button
@@ -125,7 +134,7 @@ export function BudgetProgress({ initialBudget, currentExpenses }: BudgetProgres
         </div>
       </CardHeader>
       <CardContent className="pb-4">
-        {initialBudget ? (
+        {localBudget ? (
           <div className="space-y-3">
             <Progress
               value={percentUsed}
@@ -139,7 +148,7 @@ export function BudgetProgress({ initialBudget, currentExpenses }: BudgetProgres
             />
             <div className="flex justify-between items-center">
               <p className="text-sm text-muted-foreground">
-                Remaining: ₹{(initialBudget.amount - currentExpenses).toFixed(2)}
+                Remaining: ₹{(localBudget.amount - currentExpenses).toFixed(2)}
               </p>
               <p className="text-sm font-medium">
                 {percentUsed.toFixed(1)}% used
