@@ -50,11 +50,12 @@ const HeroSection = () => {
               <span className="relative z-10 transition-all duration-300 group-hover:font-bold">Get Started</span>
             </Button>
           </Link>
-          <Link href="/demo-video" className="group">
+          <Link href="/dashboard" className="group">
             <Button 
               size="lg" 
               className="px-8 transition-all duration-300 ease-in-out hover:scale-105 hover:shadow-lg hover:border-blue-400 hover:bg-blue-50 hover:text-blue-700 group-hover:shadow-blue-300/50" 
               variant="outline"
+
             >
               <span className="transition-all duration-300 group-hover:font-semibold">Watch Demo</span>
             </Button>
