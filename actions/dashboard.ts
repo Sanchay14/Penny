@@ -322,8 +322,12 @@ export async function setDefaultAccount(accountId: string): Promise<{ success: b
       });
     });
 
+    // Revalidate multiple paths to ensure fresh data
     revalidatePath("/dashboard");
     revalidatePath("/");
+    revalidatePath("/dashboard", "layout");
+    revalidatePath("/dashboard", "page");
+    
     return { success: true };
   } catch (error: any) {
     console.error("Error setting default account:", error);

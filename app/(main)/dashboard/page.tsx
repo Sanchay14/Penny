@@ -9,7 +9,10 @@ import { Plus } from "lucide-react";
 import { getCurrentBudget } from "@/actions/budget";
 import { BudgetProgress } from "./_components/budget-progress";
 import { DashboardOverview } from "./_components/dashboard-overview";
-import { ChartTest } from "@/components/chart-test";
+
+// Force dynamic rendering and disable caching
+export const dynamic = 'force-dynamic';
+export const revalidate = 0;
 
 // Create the async component for the dashboard content
 async function DashboardContent() {
@@ -83,7 +86,6 @@ async function DashboardContent() {
         </div>
         
         {/* Temporary Chart Test */}
-        <ChartTest />
       </div>
     );
   } catch (error) {
