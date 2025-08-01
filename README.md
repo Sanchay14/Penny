@@ -149,7 +149,11 @@ Transaction → Category (N:1)
 
 ### **3. 📷 Smart Transaction Entry**
 ```mermaid
-Receipt Photo → Google Gemini AI → Data Extraction → Validation → Database
+flowchart LR
+    A[Receipt Photo] --> B[Google Gemini AI]
+    B --> C[Data Extraction]
+    C --> D[Validation]
+    D --> E[Database]
 ```
 - **Snap Receipt Photos** using device camera
 - **AI-Powered Extraction** of amount, date, and description
