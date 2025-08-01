@@ -1,0 +1,21 @@
+{
+  "name": "Penyy - Personal Finance Tracker",
+  "short_name": "Penyy",
+  "description": "Track your expenses and income even a penny",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#ffffff",
+  "theme_color": "#0079fa",
+  "icons": [
+    {
+      "src": "/logo-light.jpeg",
+      "sizes": "192x192",
+      "type": "image/jpeg"
+    },
+    {
+      "src": "/logo-light.jpeg",
+      "sizes": "512x512",
+      "type": "image/jpeg"
+    }
+  ]
+}

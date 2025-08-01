@@ -14,6 +14,25 @@ const inter = Inter({ subsets: ["latin"] });
 export const metadata: Metadata = {
   title: "Penyy",
   description: "Track your expenses and income even a penny",
+  icons: {
+    icon: [
+      { url: '/logo-light.jpeg', sizes: '32x32', type: 'image/jpeg' },
+      { url: '/logo-light.jpeg', sizes: '16x16', type: 'image/jpeg' },
+    ],
+    shortcut: '/logo-light.jpeg',
+    apple: [
+      { url: '/logo-light.jpeg', sizes: '180x180', type: 'image/jpeg' },
+    ],
+    other: [
+      {
+        rel: 'icon',
+        url: '/logo-light.jpeg',
+      },
+    ],
+  },
+  manifest: '/manifest.json',
+  themeColor: '#0079fa',
+  viewport: 'width=device-width, initial-scale=1',
 };
 
 export default function RootLayout({
