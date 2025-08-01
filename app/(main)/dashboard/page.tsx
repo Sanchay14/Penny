@@ -103,8 +103,9 @@ interface Props {
 }
 
 export default async function DashboardPage({ searchParams }: Props) {
-  // This handles the timestamp parameter for cache busting
-  const params = await searchParams;
+  // Accept searchParams for cache busting but don't need to use it
+  // The presence of searchParams forces dynamic rendering
+  await searchParams; // Consume the promise to avoid unused variable warning
   
   return (
     <div>
