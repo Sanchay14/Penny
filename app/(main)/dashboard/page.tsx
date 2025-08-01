@@ -10,9 +10,11 @@ import { getCurrentBudget } from "@/actions/budget";
 import { BudgetProgress } from "./_components/budget-progress";
 import { DashboardOverview } from "./_components/dashboard-overview";
 
-// Force dynamic rendering and disable caching
+// Completely disable all caching and force dynamic rendering
 export const dynamic = 'force-dynamic';
 export const revalidate = 0;
+export const fetchCache = 'force-no-store';
+export const runtime = 'nodejs';
 
 // Create the async component for the dashboard content
 async function DashboardContent() {
@@ -98,15 +100,8 @@ async function DashboardContent() {
   }
 }
 
-interface Props {
-  searchParams: Promise<{ t?: string }>;
-}
-
-export default async function DashboardPage({ searchParams }: Props) {
-  // Accept searchParams for cache busting but don't need to use it
-  // The presence of searchParams forces dynamic rendering
-  await searchParams; // Consume the promise to avoid unused variable warning
-  
+// Main dashboard page component
+export default function DashboardPage() {
   return (
     <div>
       {/* This title will always be visible */}

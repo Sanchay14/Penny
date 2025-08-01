@@ -54,8 +54,20 @@ function serializeTransaction(transaction: Transaction): SerializedTransaction {
 
 // Get dashboard data including transactions and accounts
 export async function getDashboardData(): Promise<{ success: boolean; data?: DashboardData; error?: string }> {
-  // Force dynamic data fetching - disable caching
+  // Force dynamic data fetching - disable caching completely
   noStore();
+  
+  // Add no-cache headers
+  if (typeof globalThis !== 'undefined' && 'headers' in globalThis) {
+    try {
+      const { headers } = await import('next/headers');
+      (await headers()).set('Cache-Control', 'no-store, no-cache, must-revalidate, max-age=0');
+      (await headers()).set('Pragma', 'no-cache');
+      (await headers()).set('Expires', '0');
+    } catch (e) {
+      // Ignore header errors in server actions
+    }
+  }
   
   try {
     const { userId } = await auth();
@@ -326,11 +338,23 @@ export async function setDefaultAccount(accountId: string): Promise<{ success: b
       });
     });
 
-    // Revalidate multiple paths to ensure fresh data
-    revalidatePath("/dashboard");
-    revalidatePath("/");
+    // Aggressive cache invalidation - revalidate everything
+    revalidatePath("/", "layout");
+    revalidatePath("/", "page");
     revalidatePath("/dashboard", "layout");
     revalidatePath("/dashboard", "page");
+    revalidatePath("/dashboard");
+    revalidatePath("/");
+    
+    // Also try to clear any potential Next.js cache
+    try {
+      const { revalidateTag } = await import('next/cache');
+      revalidateTag('dashboard');
+      revalidateTag('budget');
+      revalidateTag('accounts');
+    } catch (e) {
+      // Ignore if revalidateTag is not available
+    }
     
     return { success: true };
   } catch (error: any) {

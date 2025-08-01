@@ -214,8 +214,10 @@ export function TransactionTable({ transactions }: TransactionTableProps) {
     if (deleted && !deleteLoading) {
       toast.success("Transactions deleted successfully");
       setSelectedIds([]);
+      // Force refresh to update the transaction list
+      router.refresh();
     }
-  }, [deleted, deleteLoading]);
+  }, [deleted, deleteLoading, router]);
 
   const handleClearFilters = () => {
     setSearchTerm("");

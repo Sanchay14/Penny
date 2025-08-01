@@ -27,8 +27,20 @@ function serializeBudget(budget: Budget): Omit<Budget, "amount"> & { amount: num
 export async function getCurrentBudget(
   accountId: string
 ): Promise<{ success: boolean; data?: { budget: any | null; currentExpenses: number }; error?: string }> {
-  // Force dynamic data fetching - disable caching
+  // Force dynamic data fetching - disable caching completely
   noStore();
+  
+  // Add no-cache headers
+  if (typeof globalThis !== 'undefined' && 'headers' in globalThis) {
+    try {
+      const { headers } = await import('next/headers');
+      (await headers()).set('Cache-Control', 'no-store, no-cache, must-revalidate, max-age=0');
+      (await headers()).set('Pragma', 'no-cache');
+      (await headers()).set('Expires', '0');
+    } catch (e) {
+      // Ignore header errors in server actions
+    }
+  }
   
   try {
     const { userId } = await auth();

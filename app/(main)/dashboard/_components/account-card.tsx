@@ -13,7 +13,6 @@ import Link from "next/link";
 import { setDefaultAccount } from "@/actions/dashboard";
 import { useState } from "react";
 import { toast } from "sonner";
-import { useRouter } from "next/navigation";
 
 // Define the expected shape of the 'account' prop
 interface Account {
@@ -32,7 +31,6 @@ interface AccountCardProps {
 export function AccountCard({ account }: AccountCardProps) {
   const { name, type, balance, id, isDefault } = account;
   const [isLoading, setIsLoading] = useState(false);
-  const router = useRouter();
 
   const handleDefaultToggle = async (checked: boolean) => {
     if (!checked || isDefault) return; // Only allow setting as default, not unsetting
@@ -41,15 +39,9 @@ export function AccountCard({ account }: AccountCardProps) {
     try {
       const result = await setDefaultAccount(id);
       if (result.success) {
-        toast.success("Default account updated successfully",{duration:2000});
-        // Force refresh the page to update budget progress
-        router.refresh();
-        // For production: Force navigation to dashboard with timestamp to bust cache
-        setTimeout(() => {
-          if (typeof window !== 'undefined') {
-            router.push(`/dashboard?t=${Date.now()}`);
-          }
-        }, 300);
+        toast.success("Default account updated successfully", { duration: 2000 });
+        // Force complete page reload to bypass all caching
+        window.location.reload();
       } else {
         toast.error(result.error || "Failed to update default account");
       }

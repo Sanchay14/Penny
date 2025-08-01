@@ -2,9 +2,8 @@
 
 import { db } from "@/lib/prisma";
 import { auth } from "@clerk/nextjs/server";
-import { revalidatePath } from "next/cache";
+import { revalidatePath, unstable_cache, unstable_noStore as noStore } from "next/cache";
 import { Account, Transaction, User } from "@prisma/client";
-import { unstable_cache } from "next/cache";
 
 // Extended Account type with transactions and count
 interface AccountWithTransactions extends Account {
@@ -77,6 +76,8 @@ const getCachedUser = unstable_cache(
 export async function getAccountWithTransactions(
   accountId: string
 ): Promise<SerializedAccountWithTransactions | null> {
+  noStore(); // Prevent caching for real-time updates
+  
   const { userId } = await auth();
   if (!userId) throw new Error("Unauthorized");
 
@@ -122,7 +123,7 @@ export async function getAccountWithTransactions(
 
 export async function bulkDeleteTransactions(
   transactionIds: string[]
-): Promise<{ success: boolean; error?: string }> {
+): Promise<{ success: boolean; error?: string; timestamp?: number; headers?: Record<string, string> }> {
   try {
     const { userId } = await auth();
     if (!userId) throw new Error("Unauthorized");
@@ -182,8 +183,30 @@ export async function bulkDeleteTransactions(
     });
 
     revalidatePath("/dashboard");
-    revalidatePath("/account/[id]");
-    return { success: true };
+    revalidatePath("/dashboard", "layout");
+    revalidatePath("/account");
+    revalidatePath("/account", "layout");
+    
+    // Revalidate specific account pages
+    const accounts = await db.account.findMany({
+      where: { userId: user.id },
+      select: { id: true }
+    });
+    
+    for (const account of accounts) {
+      revalidatePath(`/account/${account.id}`);
+      revalidatePath(`/account/${account.id}`, "layout");
+    }
+
+    return { 
+      success: true,
+      timestamp: Date.now(), // Force cache bust
+      headers: {
+        'Cache-Control': 'no-store, no-cache, must-revalidate, proxy-revalidate',
+        'Pragma': 'no-cache',
+        'Expires': '0',
+      }
+    };
   } catch (error: any) {
     return { success: false, error: error.message };
   }
