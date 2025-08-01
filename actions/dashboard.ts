@@ -4,6 +4,7 @@
 import { db } from "@/lib/prisma";
 import { auth } from "@clerk/nextjs/server";
 import { revalidatePath } from "next/cache";
+import { unstable_noStore as noStore } from "next/cache";
 import { Account, User, AccountType, Transaction } from "@prisma/client";
 
 // Input interface for account creation
@@ -53,6 +54,9 @@ function serializeTransaction(transaction: Transaction): SerializedTransaction {
 
 // Get dashboard data including transactions and accounts
 export async function getDashboardData(): Promise<{ success: boolean; data?: DashboardData; error?: string }> {
+  // Force dynamic data fetching - disable caching
+  noStore();
+  
   try {
     const { userId } = await auth();
     if (!userId) {

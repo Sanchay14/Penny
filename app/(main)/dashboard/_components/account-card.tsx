@@ -44,12 +44,12 @@ export function AccountCard({ account }: AccountCardProps) {
         toast.success("Default account updated successfully",{duration:2000});
         // Force refresh the page to update budget progress
         router.refresh();
-        // Force a hard reload after a short delay for production
+        // For production: Force navigation to dashboard with timestamp to bust cache
         setTimeout(() => {
           if (typeof window !== 'undefined') {
-            window.location.reload();
+            router.push(`/dashboard?t=${Date.now()}`);
           }
-        }, 500);
+        }, 300);
       } else {
         toast.error(result.error || "Failed to update default account");
       }

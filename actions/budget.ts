@@ -4,6 +4,7 @@
 import { db } from "@/lib/prisma";
 import { auth } from "@clerk/nextjs/server";
 import { revalidatePath } from "next/cache";
+import { unstable_noStore as noStore } from "next/cache";
 import { Budget, Transaction } from "@prisma/client";
 
 // Input interface for updating budget
@@ -26,6 +27,9 @@ function serializeBudget(budget: Budget): Omit<Budget, "amount"> & { amount: num
 export async function getCurrentBudget(
   accountId: string
 ): Promise<{ success: boolean; data?: { budget: any | null; currentExpenses: number }; error?: string }> {
+  // Force dynamic data fetching - disable caching
+  noStore();
+  
   try {
     const { userId } = await auth();
     if (!userId) return { success: false, error: "Unauthorized" };
@@ -36,6 +40,7 @@ export async function getCurrentBudget(
 
     if (!user) return { success: false, error: "User not found" };
 
+    // Force fresh data by using unstable_noStore or adding timestamp
     const budget = await db.budget.findFirst({
       where: { userId: user.id },
     });

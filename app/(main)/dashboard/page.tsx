@@ -98,8 +98,14 @@ async function DashboardContent() {
   }
 }
 
-// Main dashboard page component
-export default function DashboardPage() {
+interface Props {
+  searchParams: Promise<{ t?: string }>;
+}
+
+export default async function DashboardPage({ searchParams }: Props) {
+  // This handles the timestamp parameter for cache busting
+  const params = await searchParams;
+  
   return (
     <div>
       {/* This title will always be visible */}
