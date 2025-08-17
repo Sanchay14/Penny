@@ -1,12 +1,11 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { usePathname, useSearchParams } from "next/navigation";
+import { usePathname } from "next/navigation";
 
 export default function LoadingBar() {
   const [isLoading, setIsLoading] = useState(false);
   const pathname = usePathname();
-  const searchParams = useSearchParams();
 
   useEffect(() => {
     // Function to show loading state
@@ -38,13 +37,13 @@ export default function LoadingBar() {
     };
   }, []);
 
-  // Reset loading state when pathname or searchParams change
+  // Reset loading state when pathname changes
   useEffect(() => {
     // If we're on a new page, finish the loading state
     if (window.isRouteChanging) {
       document.dispatchEvent(new Event("routeChangeComplete"));
     }
-  }, [pathname, searchParams]);
+  }, [pathname]);
 
   if (!isLoading) return null;
 

@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { ReactNode, useState, useEffect } from "react";
+import { ReactNode, useEffect } from "react";
 
 interface NavigationLinkProps {
   href: string;
@@ -19,7 +19,6 @@ declare global {
 
 export default function NavigationLink({ href, children, className }: NavigationLinkProps) {
   const router = useRouter();
-  const [isLoading, setIsLoading] = useState(false);
 
   useEffect(() => {
     // Create a function to dispatch the routeChangeComplete event
@@ -40,7 +39,6 @@ export default function NavigationLink({ href, children, className }: Navigation
 
   const handleClick = (e: React.MouseEvent<HTMLAnchorElement>) => {
     e.preventDefault();
-    setIsLoading(true);
     
     // Add loading state to window for global access
     window.isRouteChanging = true;

@@ -1,6 +1,6 @@
 
 import './globals.css'
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import {
   ClerkProvider,
 } from '@clerk/nextjs'
@@ -10,6 +10,13 @@ import { ThemeProvider}   from "@/components/theme-provider"
 import { Toaster } from 'sonner';
 
 const inter = Inter({ subsets: ["latin"] });
+
+export const viewport: Viewport = {
+  themeColor: '#0079fa',
+  width: 'device-width',
+  initialScale: 1,
+  maximumScale: 1,
+};
 
 export const metadata: Metadata = {
   title: "Penyy",
@@ -31,8 +38,6 @@ export const metadata: Metadata = {
     ],
   },
   manifest: '/manifest.json',
-  themeColor: '#0079fa',
-  viewport: 'width=device-width, initial-scale=1',
 };
 
 export default function RootLayout({
