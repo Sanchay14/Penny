@@ -9,6 +9,7 @@ import { Plus } from "lucide-react";
 import { getCurrentBudget } from "@/actions/budget";
 import { BudgetProgress } from "./_components/budget-progress";
 import { DashboardOverview } from "./_components/dashboard-overview";
+import { checkUser } from "@/lib/checkUser";
 
 // Completely disable all caching and force dynamic rendering
 export const dynamic = 'force-dynamic';
@@ -21,6 +22,16 @@ async function DashboardContent() {
   console.log("Fetching dashboard data");
   
   try {
+    // Ensure user exists in database (creates user if first time after Clerk signup)
+    const user = await checkUser();
+    if (!user) {
+      return (
+        <div className="flex items-center justify-center h-[400px]">
+          <p className="text-muted-foreground">Please sign in to continue</p>
+        </div>
+      );
+    }
+    
     // Fetch dashboard data (transactions and accounts)
     const dashboardResult = await getDashboardData();
     

@@ -6,6 +6,7 @@ import { auth } from "@clerk/nextjs/server";
 import { revalidatePath } from "next/cache";
 import { unstable_noStore as noStore } from "next/cache";
 import { Account, User, AccountType, Transaction } from "@prisma/client";
+import { checkUser } from "@/lib/checkUser";
 
 // Input interface for account creation
 interface CreateAccountInput {
@@ -75,12 +76,10 @@ export async function getDashboardData(): Promise<{ success: boolean; data?: Das
       return { success: false, error: "Unauthorized" };
     }
 
-    const user = await db.user.findUnique({
-      where: { clerkUserId: userId },
-    });
-
+    // Ensure user exists in database (creates user if first time after Clerk signup)
+    const user = await checkUser();
     if (!user) {
-      return { success: false, error: "User not found" };
+      return { success: false, error: "Failed to create or retrieve user" };
     }
 
     // Fetch all transactions sorted by date descending
@@ -210,12 +209,10 @@ export async function getUserAccounts(): Promise<{ success: boolean; data?: any[
 
     console.log("Fetching accounts for user:", userId);
     
-    const user = await db.user.findUnique({
-      where: { clerkUserId: userId },
-    });
-
+    // Ensure user exists in database (creates user if first time after Clerk signup)
+    const user = await checkUser();
     if (!user) {
-      return { success: false, error: "User not found" };
+      return { success: false, error: "Failed to create or retrieve user" };
     }
 
     console.log("User found:", user.id);
@@ -255,10 +252,10 @@ export async function createAccount(
   try {
     const { userId } = await auth();
     if (!userId) throw new Error("Unauthorized");
-    const user = await db.user.findUnique({
-      where: { clerkUserId: userId },
-    });
-    if (!user) throw new Error("User not found");
+    
+    // Ensure user exists in database (creates user if first time after Clerk signup)
+    const user = await checkUser();
+    if (!user) throw new Error("Failed to create or retrieve user");
 
     const balanceFloat = parseFloat(data.balance);
     if (isNaN(balanceFloat)) {

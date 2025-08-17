@@ -44,20 +44,10 @@ const HeroSection = () => {
           <Link href="/dashboard" className="group">
             <Button 
               size="lg" 
-              className="px-8 transition-all duration-300 ease-in-out hover:scale-110 hover:shadow-xl hover:bg-gradient-to-r hover:from-blue-600 hover:to-purple-600 hover:shadow-blue-400/40 relative overflow-hidden"
+              className="px-10 py-6 text-lg font-semibold transition-all duration-300 ease-in-out hover:scale-110 hover:shadow-xl bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 hover:shadow-blue-400/40 relative overflow-hidden"
             >
               <span className="absolute inset-0 bg-gradient-to-r from-transparent via-white/30 to-transparent translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-1000 ease-in-out"></span>
               <span className="relative z-10 transition-all duration-300 group-hover:font-bold">Get Started</span>
-            </Button>
-          </Link>
-          <Link href="/dashboard" className="group">
-            <Button 
-              size="lg" 
-              className="px-8 transition-all duration-300 ease-in-out hover:scale-105 hover:shadow-lg hover:border-blue-400 hover:bg-blue-50 hover:text-blue-700 group-hover:shadow-blue-300/50" 
-              variant="outline"
-
-            >
-              <span className="transition-all duration-300 group-hover:font-semibold">Watch Demo</span>
             </Button>
           </Link>
         </div>
